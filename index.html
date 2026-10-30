@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Инвестиции в ничего</title>
+    <link rel="icon" type="image/svg+xml" href="site.svg" />
+    <link rel="icon" type="image/x-icon" href="site.ico" />
+    <style>
+      :root[data-theme="light"] {
+        --primary: #4f5fa8;
+        --on-primary: #ffffff;
+        --primary-container: #dde1ff;
+        --on-primary-container: #00115a;
+        --surface: #fbf8fd;
+        --surface-container-low: #f5f2f9;
+        --surface-container: #efedf4;
+        --surface-container-high: #e9e7ef;
+        --on-surface: #1b1b21;
+        --on-surface-variant: #46464f;
+        --outline: #777680;
+        --outline-variant: #c7c5d0;
+        --up: #1b7f3b;
+        --down: #b3261e;
+        --down-container: #f9dedc;
+        --inverse-surface: #303036;
+        --inverse-on-surface: #f2eff7;
+        --scrim-shadow: rgba(27, 27, 33, 0.18);
+      }
+      :root[data-theme="dark"] {
+        --primary: #bac3ff;
+        --on-primary: #222d6e;
+        --primary-container: #3a4585;
+        --on-primary-container: #dde1ff;
+        --surface: #131318;
+        --surface-container-low: #1b1b21;
+        --surface-container: #1f1f25;
+        --surface-container-high: #2a2a30;
+        --on-surface: #e4e1e9;
+        --on-surface-variant: #c7c5d0;
+        --outline: #918f9a;
+        --outline-variant: #46464f;
+        --up: #7fdb98;
+        --down: #ffb4ab;
+        --down-container: #5c1a14;
+        --inverse-surface: #e4e1e9;
+        --inverse-on-surface: #303036;
+        --scrim-shadow: rgba(0, 0, 0, 0.5);
+      }
+
+      :root {
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: var(--surface);
+        color: var(--on-surface);
+        font-family:
+          Roboto,
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0 0 auto;
+        height: max(env(safe-area-inset-top, 0px), 47px);
+        background: var(--surface);
+        z-index: 6;
+      }
+
+      .top-app-bar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: grid;
+        grid-template-columns: 48px 1fr 48px;
+        align-items: center;
+        gap: 8px;
+        padding: calc(max(env(safe-area-inset-top, 0px), 47px) + 4px) 16px 12px;
+        background: var(--surface);
+      }
+      .top-app-bar .spacer {
+        width: 48px;
+      }
+      .titles {
+        text-align: center;
+        min-width: 0;
+      }
+      .titles h1 {
+        margin: 0;
+        font-size: 22px;
+        line-height: 28px;
+        font-weight: 500;
+      }
+      .titles .subtitle {
+        margin: 2px 0 0;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--on-surface-variant);
+      }
+      .theme-btn {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        border-radius: 24px;
+        border: none;
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        font-size: 20px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: background 0.2s;
+      }
+      .theme-btn:hover {
+        background: var(--outline-variant);
+      }
+
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 16px 96px;
+      }
+
+      .currency-bar {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 4px 0 8px;
+        scrollbar-width: none;
+      }
+      .currency-bar::-webkit-scrollbar {
+        display: none;
+      }
+      .cur-chip {
+        flex: 0 0 auto;
+        height: 32px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid var(--outline-variant);
+        background: transparent;
+        color: var(--on-surface-variant);
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .cur-chip.active {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        border-color: transparent;
+      }
+
+      .card {
+        background: var(--surface-container-low);
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 2px var(--scrim-shadow);
+      }
+      .summary {
+        background: var(--surface-container);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding: 20px;
+        margin-top: 4px;
+      }
+      .summary .wide {
+        grid-column: 1 / -1;
+      }
+      .label {
+        display: block;
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        color: var(--on-surface-variant);
+        margin-bottom: 4px;
+      }
+      .big {
+        font-size: 24px;
+        line-height: 32px;
+        font-weight: 400;
+        word-break: break-word;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid var(--outline-variant);
+        font-size: 14px;
+        color: var(--on-surface-variant);
+      }
+      .tick-note {
+        margin: 10px 0 0;
+        font-size: 12px;
+        color: var(--on-surface-variant);
+      }
+
+      .segmented {
+        display: flex;
+        margin: 16px 0;
+        border: 1px solid var(--outline);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .seg {
+        flex: 1;
+        height: 40px;
+        border: none;
+        background: transparent;
+        color: var(--on-surface);
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .seg + .seg {
+        border-left: 1px solid var(--outline);
+      }
+      .seg.active {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .stock {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .stock.crash {
+        background: var(--down-container);
+      }
+      .stock-top {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .ico {
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        border-radius: 16px;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        display: grid;
+        place-items: center;
+      }
+      .ico svg {
+        width: 28px;
+        height: 28px;
+      }
+      .stock.crash .ico {
+        background: var(--surface-container-high);
+        color: var(--down);
+      }
+      .info {
+        flex: 1;
+        min-width: 0;
+      }
+      .info h2 {
+        margin: 0;
+        font-size: 16px;
+        line-height: 22px;
+        font-weight: 500;
+      }
+      .desc {
+        margin: 2px 0 0;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--on-surface-variant);
+      }
+      .stock.crash .desc {
+        color: var(--down);
+      }
+      .sub {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--on-surface-variant);
+      }
+      .side {
+        text-align: right;
+        flex: 0 0 auto;
+      }
+      .side .value {
+        font-size: 16px;
+        line-height: 22px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .chg {
+        font-size: 13px;
+        line-height: 18px;
+        white-space: nowrap;
+      }
+      .up {
+        color: var(--up);
+      }
+      .down {
+        color: var(--down);
+      }
+      .stock.crash .value,
+      .stock.crash .chg {
+        color: var(--down);
+      }
+
+      .chart-block {
+        background: var(--surface-container);
+        border-radius: 16px;
+        padding: 12px;
+      }
+      .chart-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--on-surface-variant);
+      }
+      .date-in {
+        height: 32px;
+        padding: 0 8px;
+        border-radius: 8px;
+        border: 1px solid var(--outline-variant);
+        background: var(--surface-container-low);
+        color: var(--on-surface);
+        font: inherit;
+        font-size: 13px;
+      }
+      .chart {
+        width: 100%;
+        height: 110px;
+        display: block;
+      }
+      .chart .line {
+        fill: none;
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+        stroke-linejoin: round;
+      }
+      .chart .area {
+        fill-opacity: 0.14;
+        stroke: none;
+      }
+      .chart.up .line,
+      .chart.up .area {
+        stroke: var(--up);
+        fill: var(--up);
+      }
+      .chart.down .line,
+      .chart.down .area {
+        stroke: var(--down);
+        fill: var(--down);
+      }
+      .chart-foot {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--on-surface-variant);
+      }
+
+      .stock-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .owned {
+        font-size: 13px;
+        color: var(--on-surface-variant);
+      }
+
+      .btn {
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 20px;
+        border: none;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          box-shadow 0.2s,
+          opacity 0.2s;
+        white-space: nowrap;
+      }
+      .btn.filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+      .btn.filled:hover {
+        box-shadow: 0 1px 3px var(--scrim-shadow);
+      }
+      .btn.tonal {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+      .btn:disabled {
+        background: var(--surface-container-high);
+        color: var(--on-surface-variant);
+        opacity: 0.38;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 48px 16px;
+        color: var(--on-surface-variant);
+        font-size: 15px;
+      }
+
+      .snackbar {
+        position: fixed;
+        left: 50%;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+        transform: translate(-50%, 140px);
+        max-width: calc(100% - 32px);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        padding: 14px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        box-shadow: 0 3px 6px var(--scrim-shadow);
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+        z-index: 10;
+      }
+      .snackbar.show {
+        transform: translate(-50%, 0);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top-app-bar">
+      <div class="spacer"></div>
+      <div class="titles">
+        <h1>Инвестиции в ничего</h1>
+        <p class="subtitle">Торгуй как инвестор с Уолл-стрит (ну почти)</p>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="Сменить тему">
+        ◐
+      </button>
+    </header>
+
+    <main>
+      <div class="currency-bar" id="currencyBar"></div>
+
+      <section class="card summary">
+        <div>
+          <span class="label">Доступно</span>
+          <span class="big" id="cash">—</span>
+        </div>
+        <div>
+          <span class="label">В акциях</span>
+          <span class="big" id="equity">—</span>
+        </div>
+        <div class="wide">
+          <span class="label">Итого</span>
+          <span class="big" id="total">—</span>
+        </div>
+        <div class="wide">
+          <span class="chip" id="slots">Акций: 0 / 20</span>
+          <p class="tick-note" id="tickNote"></p>
+        </div>
+      </section>
+
+      <nav class="segmented">
+        <button class="seg active" data-tab="market">Рынок</button>
+        <button class="seg" data-tab="portfolio">Мой портфель</button>
+      </nav>
+
+      <div id="list"></div>
+    </main>
+
+    <div class="snackbar" id="snackbar" role="status"></div>
+
+    <script>
+      /* ============ Config ============ */
+      const TICK_MS = 10 * 60 * 1000; // котировки обновляются раз в 10 минут
+      const START_MS = Date.UTC(2026, 0, 1); // начало истории котировок
+      const START_CASH = 100000; // в USD
+      const MAX_SHARES = 100;
+      const LOT = 1;
+      const DAY_TICKS = 144; // 24 часа / 10 минут
+
+      const CURRENCIES = {
+        usd: { name: "USD", sym: "$", rate: 1 },
+        eur: { name: "EUR", sym: "€", rate: 0.92 },
+        rub: { name: "RUB", sym: "₽", rate: 92.5 },
+        kzt: { name: "KZT", sym: "₸", rate: 505 },
+        chf: { name: "CHF", sym: "Fr.", rate: 0.8 },
+      };
+
+      const ICONS = {
+        potato:
+          '<ellipse cx="12" cy="13" rx="8" ry="5.5"/><circle cx="9" cy="12" r=".8"/><circle cx="14.5" cy="14" r=".8"/><circle cx="11" cy="16" r=".8"/>',
+        sand: '<path d="M3 20h18"/><path d="M5 20c1-7 4-11 7-11s6 4 7 11"/><path d="M12 9V4M10 5h4"/>',
+        fish: '<path d="M3 12c3-4 7-5 11-2l4-3v10l-4-3c-4 3-8 2-11-2z"/><circle cx="8" cy="11.5" r=".9"/>',
+        clouds:
+          '<path d="M7 4h10M8 4v2c-2 1-3 3-3 5v7c0 2 1 2 2 2h8c1 0 2 0 2-2v-7c0-2-1-4-3-5V4"/><path d="M9 15.5a2 2 0 0 1 2-2 2.5 2.5 0 0 1 4.5.5 1.5 1.5 0 0 1 .5 3H9.5a1.5 1.5 0 0 1-.5-1.5z"/>',
+        moon: '<path d="M15 3.5A9 9 0 1 0 20.5 15 7 7 0 0 1 15 3.5z"/>',
+        penguin:
+          '<path d="M12 3c-3 0-4.5 3-4.5 7.5S8.5 19 12 19s4.5-3 4.5-8.5S15 3 12 3z"/><path d="M12 9.5c-1.2 0-1.8 1.5-1.8 3.2s.6 3.8 1.8 3.8 1.8-2 1.8-3.8-.6-3.2-1.8-3.2z"/><path d="M9.5 21h2M12.5 21h2"/>',
+        rain: '<path d="M12 3c3 4 6 7 6 10.5A6 6 0 0 1 6 13.5C6 10 9 7 12 3z"/><path d="M9.5 14a2.5 2.5 0 0 0 2.5 2.5"/>',
+        glacier:
+          '<path d="M2 20l5-8 3 4 3-6 3 5 2-2 4 7z"/><path d="M2 22h20"/>',
+        shadow:
+          '<path d="M12 3l4.5 6H14l4 5H6l4-5H7.5z"/><path d="M12 19v2"/><ellipse cx="12" cy="22" rx="7" ry="1.2"/>',
+        wifi: '<path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.5 12.5a9.5 9.5 0 0 1 13 0"/><path d="M8.7 16a5 5 0 0 1 6.6 0"/><circle cx="12" cy="19.5" r="1"/>',
+        socks: '<path d="M8 3h7v9l3 3.5V20H8z"/><path d="M8 7h7"/>',
+        dust: '<path d="M3 8h18v12H3z"/><path d="M3 8l2.5-4h13L21 8"/><path d="M9 13h6"/>',
+        gravity:
+          '<path d="M12 9c-3 0-5 2-5 5s2 6 5 6 5-3 5-6-2-5-5-5z"/><path d="M12 9c0-2 1-3.5 3-4"/><path d="M12 1.5v2"/>',
+        echo: '<path d="M3.5 9h4l5-4v14l-5-4h-4z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/>',
+        monday:
+          '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+        air: '<path d="M10 3h4v3l2.5 3.5V20h-9V9.5L10 6z"/><path d="M9.5 14h5"/>',
+      };
+
+      const STOCKS = [
+        {
+          id: "potato",
+          name: "Картофельные поля в Литве",
+          icon: "potato",
+          unit: "га",
+          base: 8000,
+          normal: [
+            "Будут прополоты через 2 дня",
+            "Ждём урожай, но картошка пока не растёт",
+            "Литовский фермер утверждает, что поля спокойны",
+          ],
+          crash: [
+            "Будут прополоты через 2 дня... и сорняки тоже",
+            "Картошку съели в целях экономии",
+          ],
+        },
+        {
+          id: "sand",
+          name: "Ферма песка",
+          icon: "sand",
+          unit: "кг",
+          base: 388,
+          normal: [
+            "Песок растёт в цене каждый день",
+            "Фермер гарантирует, что песок никуда не денется",
+          ],
+          crash: [
+            "Песок высыпался в незапланированном месте",
+            "Ферма переехала в пустыню без предупреждения",
+          ],
+        },
+        {
+          id: "fish",
+          name: "Редкие рыбы",
+          icon: "fish",
+          unit: "шт",
+          base: 1200,
+          normal: [
+            "Будут сожжены через 7 дней",
+            "Редкие, но только до пятницы",
+          ],
+          crash: [
+            "Будут сожжены через 7 дней, пепел тоже ценный",
+            "Рыбы оказались обычными гуппи",
+          ],
+        },
+        {
+          id: "clouds",
+          name: "Облака в банке",
+          icon: "clouds",
+          unit: "банка",
+          base: 50,
+          normal: [
+            "Облака на складе, свежие с утра",
+            "Упакованы в банки с гарантией",
+          ],
+          crash: ["Облака выпущены на волю", "Банка оказалась пустой"],
+        },
+        {
+          id: "moon",
+          name: "Аренда Луны",
+          icon: "moon",
+          unit: "м²",
+          base: 2500,
+          normal: [
+            "Договор продлён до 2050 года",
+            "Соседи жалуются на приливы",
+          ],
+          crash: [
+            "Луна съехала, договор расторгнут",
+            "Вид на Луну ограничен облаками",
+          ],
+        },
+        {
+          id: "penguins",
+          name: "Пингвины в аренду",
+          icon: "penguin",
+          unit: "шт",
+          base: 900,
+          normal: [
+            "Сдаются по выходным, без залога",
+            "Холодный сезон, спрос растёт",
+          ],
+          crash: [
+            "Пингвины ушли в отпуск на Антарктиду",
+            "Арендаторы разбежались, сезон закончился",
+          ],
+        },
+        {
+          id: "rain",
+          name: "Дождь по расписанию",
+          icon: "rain",
+          unit: "капля",
+          base: 15,
+          normal: [
+            "Прогноз обещает мокро с четверга",
+            "Капли выдаются строго по графику",
+          ],
+          crash: [
+            "Прогноз ошибся: солнечно весь год",
+            "Капли отменены из-за засухи",
+          ],
+        },
+        {
+          id: "glacier",
+          name: "Ледник на прокат",
+          icon: "glacier",
+          unit: "глыба",
+          base: 4000,
+          normal: [
+            "Сдаётся для коктейлей, тает медленно",
+            "Тает медленно, но уверенно",
+          ],
+          crash: [
+            "Ледник растаял в подарок конкурентам",
+            "Глыбу украли в понедельник",
+          ],
+        },
+        {
+          id: "shadow",
+          name: "Тень от дерева",
+          icon: "shadow",
+          unit: "м²",
+          base: 300,
+          normal: [
+            "Растёт вместе с деревом, без посадки",
+            "Тень сдаётся по часам",
+          ],
+          crash: [
+            "Дерево срубили, тень осталась без хозяина",
+            "Солнце зашло за облако, тень исчезла",
+          ],
+        },
+        {
+          id: "wifi",
+          name: "Чужой Wi-Fi",
+          icon: "wifi",
+          unit: "ГБ",
+          base: 35,
+          normal: ["Сигнал стабилен у соседей", "Пароль угадан, поток растёт"],
+          crash: ["Сосед сменил пароль", "Роутер ушёл в перезагрузку навсегда"],
+        },
+        {
+          id: "socks",
+          name: "Носки без пары",
+          icon: "socks",
+          unit: "шт",
+          base: 4,
+          normal: [
+            "Пары ищут, но пока не нашли",
+            "Растут в сушилке без присмотра",
+          ],
+          crash: [
+            "Последняя пара пропала в стиральной машине",
+            "Найдены, но им уже не подходит",
+          ],
+        },
+        {
+          id: "dust",
+          name: "Пыль в коробках",
+          icon: "dust",
+          unit: "кг",
+          base: 60,
+          normal: [
+            "Лежит на антресолях, копится",
+            "Коробки запечатаны, пыль довольна",
+          ],
+          crash: ["Коробку вынесли на помойку", "Пылесос объявил забастовку"],
+        },
+        {
+          id: "gravity",
+          name: "Гравитация со скидкой",
+          icon: "gravity",
+          unit: "порция",
+          base: 90,
+          normal: [
+            "Держит всё на своих местах",
+            "Продаётся в розницу, без возврата",
+          ],
+          crash: ["Скидка закончилась, всё падает", "Яблоки отказались падать"],
+        },
+        {
+          id: "echo",
+          name: "Эхо по подписке",
+          icon: "echo",
+          unit: "мин",
+          base: 25,
+          normal: [
+            "Отзывается с задержкой в полсекунды",
+            "Подписка продлевается автоматически",
+          ],
+          crash: ["Эхо ушло в другой подъезд", "Подписка отменена, эхо молчит"],
+        },
+        {
+          id: "monday",
+          name: "Понедельники оптом",
+          icon: "monday",
+          unit: "шт",
+          base: 150,
+          normal: ["Поставки ожидаются каждую неделю", "Упаковка без выходных"],
+          crash: [
+            "Партия пришла в субботу, не сдана",
+            "Пятница отменила поставку",
+          ],
+        },
+        {
+          id: "air",
+          name: "Воздух в бутылках",
+          icon: "air",
+          unit: "л",
+          base: 22,
+          normal: [
+            "Альпийский, свежий, почти бесплатный",
+            "Бутылки плотно закрыты",
+          ],
+          crash: ["Бутылку открыли в лифте", "Воздух протух на складе"],
+        },
+      ];
+
+      function hashStr(str) {
+        let h = 2166136261;
+        for (const c of str) {
+          h ^= c.charCodeAt(0);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+      function mulberry32(seed) {
+        return function () {
+          seed |= 0;
+          seed = (seed + 0x6d2b79f5) | 0;
+          let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      function gauss(rng) {
+        let u = rng();
+        if (u < 1e-9) u = 1e-9;
+        const v = rng();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      }
+      function initStock(s) {
+        s.rng = mulberry32(hashStr(s.id));
+        s.mu = 0.000008 + s.rng() * 0.000017; // небольшой плавный прирост за тик
+        s.prices = [s.base];
+      }
+      function stepStock(s) {
+        const g = gauss(s.rng);
+        const u = s.rng();
+        let ch = s.mu + 0.0012 * g; // обычная «шумовая» корректировка
+        if (u < 0.003)
+          ch -= 0.005 + 0.012 * s.rng(); // редкая небольшая просадка
+        else if (u > 0.997) ch += 0.005 + 0.01 * s.rng(); // редкий небольшой скачок
+        ch = Math.max(-0.02, Math.min(0.02, ch));
+        const last = s.prices[s.prices.length - 1];
+        s.prices.push(Math.max(s.base * 0.2, last * Math.exp(ch)));
+      }
+      STOCKS.forEach(initStock);
+
+      const currentTick = () => Math.floor((Date.now() - START_MS) / TICK_MS);
+      function ensureTicks() {
+        const T = currentTick();
+        for (const s of STOCKS) while (s.prices.length <= T) stepStock(s);
+      }
+      function pickText(s, T, lastCh) {
+        const pool = lastCh < -0.002 ? s.crash : s.normal;
+        return pool[hashStr(s.id + ":" + T) % pool.length];
+      }
+
+      function getCookie(name) {
+        const m = document.cookie.match(
+          new RegExp("(?:^|;\\s*)" + name + "=([^;]*)"),
+        );
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      function setCookie(name, value) {
+        document.cookie =
+          name +
+          "=" +
+          encodeURIComponent(value) +
+          "; max-age=31536000; path=/; SameSite=Lax";
+      }
+      function loadState() {
+        const raw = getCookie("portfolio");
+        if (raw) {
+          try {
+            const s = JSON.parse(raw);
+            if (
+              typeof s.cash === "number" &&
+              s.holdings &&
+              typeof s.holdings === "object"
+            ) {
+              const holdings = {};
+              let total = 0;
+              for (const st of STOCKS) {
+                const h = s.holdings[st.id];
+                let q = 0,
+                  c = 0;
+                if (typeof h === "number") {
+                  q = Math.floor(h);
+                  c = q * st.base;
+                } // миграция старого формата
+                else if (h && typeof h === "object") {
+                  q = Math.floor(Number(h.q) || 0);
+                  c = Number(h.c) || 0;
+                }
+                if (q > 0) {
+                  holdings[st.id] = { q, c };
+                  total += q;
+                }
+              }
+              if (total <= MAX_SHARES) return { cash: s.cash, holdings };
+            }
+          } catch (e) {
+          }
+        }
+        return { cash: START_CASH, holdings: {} };
+      }
+      function saveState() {
+        setCookie("portfolio", JSON.stringify(state));
+      }
+
+      let state = loadState();
+      let tab = "market";
+      let currency = CURRENCIES[getCookie("currency")]
+        ? getCookie("currency")
+        : "usd";
+      const dateSel = {};
+
+      const fmt = new Intl.NumberFormat("ru-RU", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      const cur = () => CURRENCIES[currency];
+      const toCur = (usd) => usd * cur().rate;
+      const money = (usd) => fmt.format(toCur(usd)) + " " + cur().sym;
+      const signedMoney = (usd) => (usd >= 0 ? "+" : "") + money(usd);
+      const pct = (v) =>
+        (v >= 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + "%";
+      const round2 = (x) => Math.round(x * 100) / 100;
+      const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+      const todayISO = () => iso(Date.now());
+
+      const totalUnits = () =>
+        Object.values(state.holdings).reduce((a, h) => a + h.q, 0);
+      const equity = () =>
+        STOCKS.reduce((sum, s) => {
+          const h = state.holdings[s.id];
+          return sum + (h ? h.q * s.prices[currentTick()] : 0);
+        }, 0);
+
+      function buy(id) {
+        const s = STOCKS.find((x) => x.id === id);
+        if (!s) return;
+        const price = s.prices[currentTick()];
+        if (totalUnits() + LOT > MAX_SHARES) {
+          toast("Лимит портфеля: " + MAX_SHARES + " акций");
+          return;
+        }
+        if (state.cash < price) {
+          toast("Недостаточно средств на балансе");
+          return;
+        }
+        state.cash = round2(state.cash - price);
+        const h = state.holdings[s.id] || { q: 0, c: 0 };
+        state.holdings[s.id] = { q: h.q + LOT, c: round2(h.c + price) };
+        saveState();
+        toast("Куплено: " + LOT + " " + s.unit + " — " + s.name);
+        render();
+      }
+      function sell(id) {
+        const s = STOCKS.find((x) => x.id === id);
+        const h = state.holdings[id];
+        if (!s || !h) return;
+        const price = s.prices[currentTick()];
+        state.cash = round2(state.cash + price);
+        const newQ = h.q - LOT;
+        if (newQ <= 0) delete state.holdings[id];
+        else state.holdings[id] = { q: newQ, c: round2((h.c * newQ) / h.q) };
+        saveState();
+        toast("Продано: " + LOT + " " + s.unit + " — " + s.name);
+        render();
+      }
+
+      let toastTimer;
+      function toast(msg) {
+        const el = document.getElementById("snackbar");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove("show"), 2500);
+      }
+
+      function chartHTML(s, T) {
+        const startISO = dateSel[s.id] || iso(START_MS);
+        let st = Math.floor(
+          (Date.parse(startISO + "T00:00:00Z") - START_MS) / TICK_MS,
+        );
+        st = Math.max(0, Math.min(st, T));
+        const n = T - st + 1;
+        const step = Math.max(1, Math.ceil(n / 150));
+        const pts = [];
+        for (let i = st; i <= T; i += step) pts.push(i);
+        if (pts[pts.length - 1] !== T) pts.push(T);
+
+        const vals = pts.map((i) => toCur(s.prices[i]));
+        const min = Math.min(...vals),
+          max = Math.max(...vals);
+        const W = 320,
+          H = 120;
+        const coords = vals.map((v, k) => {
+          const x = pts.length === 1 ? W / 2 : (k / (pts.length - 1)) * W;
+          const y = H - 8 - ((v - min) / (max - min || 1)) * (H - 16);
+          return x.toFixed(1) + " " + y.toFixed(1);
+        });
+        const line = "M" + coords.join(" L");
+        const area = line + " L" + W + " " + H + " L0 " + H + " Z";
+
+        const startP = s.prices[st],
+          endP = s.prices[T];
+        const growth = endP / startP - 1;
+        const cls = growth >= 0 ? "up" : "down";
+
+        return `
+    <div class="chart-block">
+      <div class="chart-head">
+        <span>С даты</span>
+        <input type="date" class="date-in" data-date="${s.id}" min="${iso(START_MS)}" max="${todayISO()}" value="${startISO}">
+      </div>
+      <svg class="chart ${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <path class="area" d="${area}"/>
+        <path class="line" d="${line}"/>
+      </svg>
+      <div class="chart-foot">${money(startP)} → ${money(endP)} • ${pct(growth)}</div>
+    </div>`;
+      }
+
+      function cardHTML(s, mode, T) {
+        const price = s.prices[T];
+        const dayCh = price / s.prices[Math.max(0, T - DAY_TICKS)] - 1;
+        const lastCh = price / s.prices[Math.max(0, T - 1)] - 1;
+        const crash = dayCh <= -0.01;
+        const text = pickText(s, T, lastCh);
+        const h = state.holdings[s.id];
+        const q = h ? h.q : 0;
+        const canBuy = state.cash >= price && totalUnits() + LOT <= MAX_SHARES;
+
+        let side, sub, actions;
+        if (mode === "market") {
+          sub = `<p class="sub">Цена за 1 ${s.unit}</p>`;
+          side = `<div class="value">${money(price)}</div>
+            <div class="chg ${dayCh >= 0 ? "up" : "down"}">${pct(dayCh)} за сутки</div>`;
+          actions = `<span class="owned">В портфеле: ${q} ${s.unit}</span>
+               <button class="btn filled" data-buy="${s.id}" ${canBuy ? "" : "disabled"}>Купить ${LOT} ${s.unit}</button>`;
+        } else {
+          const pl = q * price - h.c;
+          sub = `<p class="sub">${q} ${s.unit} • средняя покупка ${money(h.c / q)}</p>`;
+          side = `<div class="value">${money(q * price)}</div>
+            <div class="chg ${pl >= 0 ? "up" : "down"}">${signedMoney(pl)} • ${pct(pl / h.c)}</div>`;
+          actions = `<span class="owned">Цена продажи: ${money(price)}</span>
+               <button class="btn tonal" data-sell="${s.id}">Продать ${LOT} ${s.unit}</button>`;
+        }
+
+        return `
+  <article class="card stock${crash ? " crash" : ""}">
+    <div class="stock-top">
+      <div class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[s.icon]}</svg>
+      </div>
+      <div class="info">
+        <h2>${s.name}</h2>
+        <p class="desc">${text}</p>
+        ${sub}
+      </div>
+      <div class="side">${side}</div>
+    </div>
+    ${chartHTML(s, T)}
+    <div class="stock-bottom">${actions}</div>
+  </article>`;
+      }
+
+      function render() {
+        const T = currentTick();
+        document.getElementById("cash").textContent = money(state.cash);
+        const eq = equity();
+        document.getElementById("equity").textContent = money(eq);
+        document.getElementById("total").textContent = money(state.cash + eq);
+        document.getElementById("slots").textContent =
+          "Акций: " + totalUnits() + " / " + MAX_SHARES;
+
+        document.getElementById("currencyBar").innerHTML = Object.entries(
+          CURRENCIES,
+        )
+          .map(
+            ([k, c]) =>
+              `<button class="cur-chip${k === currency ? " active" : ""}" data-cur="${k}">${c.name} ${c.sym}</button>`,
+          )
+          .join("");
+
+        document
+          .querySelectorAll(".seg")
+          .forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+
+        const list = document.getElementById("list");
+        if (tab === "market") {
+          list.innerHTML = STOCKS.map((s) => cardHTML(s, "market", T)).join("");
+        } else {
+          const held = STOCKS.filter((s) => state.holdings[s.id]);
+          list.innerHTML = held.length
+            ? held.map((s) => cardHTML(s, "portfolio", T)).join("")
+            : '<div class="empty">Портфель пуст. Купи что-нибудь, если не жалко денег.</div>';
+        }
+        updateTickNote();
+      }
+
+      function updateTickNote() {
+        const next = START_MS + (currentTick() + 1) * TICK_MS;
+        const left = Math.max(0, next - Date.now());
+        const m = String(Math.floor(left / 60000)).padStart(2, "0");
+        const sec = String(Math.floor((left % 60000) / 1000)).padStart(2, "0");
+        document.getElementById("tickNote").textContent =
+          "Котировки обновляются каждые 10 минут · следующее обновление через " +
+          m +
+          ":" +
+          sec;
+      }
+
+      function applyTheme(t) {
+        document.documentElement.dataset.theme = t;
+      }
+      let theme =
+        getCookie("theme") ||
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      applyTheme(theme);
+
+      document.addEventListener("click", (e) => {
+        const buyBtn = e.target.closest("[data-buy]");
+        if (buyBtn && !buyBtn.disabled) {
+          buy(buyBtn.dataset.buy);
+          return;
+        }
+
+        const sellBtn = e.target.closest("[data-sell]");
+        if (sellBtn) {
+          sell(sellBtn.dataset.sell);
+          return;
+        }
+
+        const tabBtn = e.target.closest("[data-tab]");
+        if (tabBtn) {
+          tab = tabBtn.dataset.tab;
+          render();
+          return;
+        }
+
+        const curBtn = e.target.closest("[data-cur]");
+        if (curBtn) {
+          currency = curBtn.dataset.cur;
+          setCookie("currency", currency);
+          render();
+          return;
+        }
+
+        if (e.target.closest("#themeBtn")) {
+          theme = theme === "dark" ? "light" : "dark";
+          applyTheme(theme);
+          setCookie("theme", theme);
+        }
+      });
+      document.addEventListener("change", (e) => {
+        const input = e.target.closest(".date-in");
+        if (input) {
+          dateSel[input.dataset.date] = input.value;
+          render();
+        }
+      });
+
+      let lastTick = -1;
+      function loop() {
+        const T = currentTick();
+        if (T !== lastTick) {
+          ensureTicks();
+          lastTick = T;
+          render();
+        } else {
+          updateTickNote();
+        }
+      }
+      ensureTicks();
+      lastTick = currentTick();
+      render();
+      setInterval(loop, 1000);
+    </script>
+  </body>
+</html>
